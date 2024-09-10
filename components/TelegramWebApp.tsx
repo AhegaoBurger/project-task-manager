@@ -23,17 +23,12 @@ export default function TelegramWebApp() {
 
   const handleAddBot = () => {
     const botUsername = "TonYarnBot"; // Replace with your actual bot username
-    const parameter = "addbot"; // Optional: Replace with your custom parameter if needed
-    const adminRights = "change_info+post_messages+edit_messages"; // Customize as needed
+    const parameter = "1";
 
     // This URL will work for both groups and channels
-    // const url = `https://t.me/${botUsername}?startgroup&admin=${adminRights}`;
-    // const url = `https://t.me/${botUsername}?startgroup&startchannel&admin=${adminRights}`;
-    // const url = `https://t.me/${botUsername}?startchannel&admin=${adminRights}`;
-    const url = `https://t.me/${botUsername}?startgroup={user: 1, groups: 1, channels: 1}`;
-    // const url = `https://t.me/${botUsername}?startchannel&startgroup`;
-    // const url = `https://t.me/${botUsername}?startchannel&admin`;
-    console.log("URL: ", url);
+    const url = `https://t.me/${botUsername}?startgroup=${parameter}`;
+
+    // console.log("URL: ", url);
 
     WebApp.openTelegramLink(url);
   };

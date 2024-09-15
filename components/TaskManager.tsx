@@ -18,9 +18,12 @@ import {
   PlusCircle,
 } from "lucide-react";
 import Link from "next/link";
+import WebApp from "@twa-dev/sdk";
 
 const TaskManager = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  WebApp.BackButton.hide();
 
   const menuItems = [
     {

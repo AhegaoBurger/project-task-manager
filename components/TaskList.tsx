@@ -10,9 +10,13 @@ import {
   MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
+import WebApp from "@twa-dev/sdk";
 
 export default function TaskList() {
   const [isLoading, setIsLoading] = useState(true);
+
+  WebApp.BackButton.show();
+  WebApp.BackButton.onClick(() => window.history.back());
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -24,21 +28,6 @@ export default function TaskList() {
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b border-gray-800">
-        <Link href="/">
-          <div className="flex items-center">
-            <ChevronLeft className="text-blue-400 mr-2" />
-            <span className="text-blue-400">Back</span>
-          </div>
-        </Link>
-        <div>
-          <h1 className="text-lg font-semibold">UTasks | Task Manager</h1>
-          <p className="text-xs text-gray-400 text-center">mini app</p>
-        </div>
-        <MoreVertical className="text-gray-400" />
-      </div>
-
       {/* Content */}
       <div className="flex-1 p-4">
         {/* Task Icon and Title */}

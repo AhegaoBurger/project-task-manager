@@ -3,7 +3,21 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PlusIcon, XIcon, ChevronRightIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  PlusIcon,
+  XIcon,
+  MoreVertical,
+  ChevronRight,
+  MessageCircle,
+  Inbox,
+  Calendar,
+  CalendarCheck,
+  CalendarDays,
+  CheckSquare,
+  PlusCircle,
+} from "lucide-react";
 
 const TaskManager = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -18,8 +32,15 @@ const TaskManager = () => {
       count: "1/2",
     },
     { icon: "➕", name: "Add task" },
-    { icon: "🔵", name: "All", count: "0" },
-    { icon: "📥", name: "Inbox", count: "0" },
+  ];
+
+  const taskItems = [
+    { icon: "🔵", name: "All", count: "2" },
+    { icon: "📥", name: "Inbox", count: "1" },
+    { icon: "📅", name: "Today", count: "2" },
+    { icon: "🔜", name: "Tomorrow", count: "0" },
+    { icon: "📆", name: "Next 7 Days", count: "0" },
+    { icon: "✅", name: "Completed", count: "2" },
   ];
 
   const popupItems = [
@@ -52,100 +73,110 @@ const TaskManager = () => {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-black text-white">
-      <header className="flex justify-between items-center p-4">
-        <Button variant="ghost" className="text-blue-400">
-          Close
-        </Button>
-        <div className="text-center">
-          <h1 className="text-lg font-semibold">UTasks | Task Manager</h1>
-          <p className="text-xs text-gray-400">mini app</p>
+    <div className="flex flex-col h-screen bg-gray-100 text-gray-900">
+      <Card className="m-2 bg-white">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center">
+            <Avatar className="bg-green-500 text-white">
+              <AvatarFallback>A</AvatarFallback>
+            </Avatar>
+            <span className="ml-3 font-medium">Artur</span>
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </div>
+          <div className="flex items-center">
+            <span className="bg-gray-200 text-blue-500 px-3 py-1 rounded-full text-sm">
+              Free
+            </span>
+            <ChevronRight className="h-4 w-4 ml-1 text-blue-500" />
+          </div>
         </div>
-        <Button variant="ghost" size="icon">
-          ...
-        </Button>
-      </header>
+      </Card>
 
-      <div className="flex items-center p-4">
-        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-xl font-bold mr-3">
-          A
-        </div>
-        <span>Artur</span>
-        <ChevronRightIcon className="ml-1 h-4 w-4" />
-        <span className="ml-auto bg-gray-800 text-blue-400 px-3 py-1 rounded-full text-sm">
-          Free
-        </span>
-        <ChevronRightIcon className="ml-1 h-4 w-4 text-blue-400" />
-      </div>
-
-      <Card className="flex-1 overflow-y-auto bg-black border-none">
-        {menuItems.map((item, index) => (
-          <div
-            key={index}
-            className="p-4 border-b border-gray-800 flex items-center"
-          >
-            <span className="mr-3 text-xl">{item.icon}</span>
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
+      {menuItems.map((item, index) => (
+        <Card key={index} className="m-2 bg-white">
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="mr-3 text-xl">{item.icon}</span>
+              <div>
                 <span>{item.name}</span>
-                {item.count && (
-                  <span className="text-gray-500">{item.count}</span>
-                )}
-                {item.action && (
-                  <Button variant="ghost" className="text-blue-400">
-                    {item.action}
-                  </Button>
+                {item.subtext && (
+                  <p className="text-sm text-gray-500 mt-1">{item.subtext}</p>
                 )}
               </div>
-              {item.subtext && (
-                <p className="text-sm text-gray-500 mt-1">{item.subtext}</p>
-              )}
             </div>
-            {!item.action && <ChevronRightIcon className="text-gray-500" />}
+            {item.count && <span className="text-gray-500">{item.count}</span>}
+            {item.action && (
+              <Button variant="ghost" className="text-blue-500 px-0">
+                {item.action}
+              </Button>
+            )}
+            {!item.action && <ChevronRight className="h-4 w-4 text-gray-400" />}
+          </div>
+        </Card>
+      ))}
+
+      <Card className="m-2 bg-white">
+        {taskItems.map((item, index) => (
+          <div
+            key={index}
+            className="p-4 flex items-center justify-between border-b last:border-b-0"
+          >
+            <div className="flex items-center">
+              <span className="mr-3 text-xl">{item.icon}</span>
+              <span>{item.name}</span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-gray-500 mr-2">{item.count}</span>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+            </div>
           </div>
         ))}
       </Card>
 
-      {isPopupOpen && (
-        <Card className="absolute bottom-20 left-4 right-4 bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-          {popupItems.map((item, index) => (
-            <div
-              key={index}
-              className="p-4 border-b border-gray-800 flex items-center"
-            >
-              <span className="mr-3 text-xl">{item.icon}</span>
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <span>{item.name}</span>
-                  {item.count && (
-                    <span className="text-gray-500">{item.count}</span>
-                  )}
-                  {item.badge && (
-                    <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs">
-                      {item.badge}
+      <div className="fixed bottom-4 right-4 flex flex-col items-end">
+        <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
+          <DialogContent className="sm:max-w-[300px] p-0 bg-white rounded-lg overflow-hidden  mb-4">
+            {popupItems.map((item, index) => (
+              <div
+                key={index}
+                className="p-4 flex items-start border-b last:border-b-0"
+              >
+                <span className="mr-3 text-2xl">{item.icon}</span>
+                <div className="flex-1">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-900">
+                      {item.name}
                     </span>
-                  )}
+                    {item.count && (
+                      <span className="text-gray-500 text-sm">
+                        {item.count}
+                      </span>
+                    )}
+                    {item.badge && (
+                      <span className="bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">{item.subtext}</p>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{item.subtext}</p>
+                <ChevronRight className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
               </div>
-              <ChevronRightIcon className="text-gray-500" />
-            </div>
-          ))}
-        </Card>
-      )}
-
-      <div className="p-4 flex justify-end">
-        <Button
-          size="icon"
-          className="rounded-full w-14 h-14 bg-blue-500 hover:bg-blue-600"
-          onClick={() => setIsPopupOpen(!isPopupOpen)}
-        >
-          {isPopupOpen ? (
-            <XIcon className="h-6 w-6" />
-          ) : (
-            <PlusIcon className="h-6 w-6" />
-          )}
-        </Button>
+            ))}
+          </DialogContent>
+          <DialogTrigger asChild>
+            <Button
+              size="icon"
+              className="rounded-full w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              {isPopupOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Plus className="h-6 w-6" />
+              )}
+            </Button>
+          </DialogTrigger>
+        </Dialog>
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ import {
   CheckSquare,
   PlusCircle,
 } from "lucide-react";
+import Link from "next/link";
 
 const TaskManager = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -145,21 +146,23 @@ const TaskManager = () => {
       ))}
 
       <Card className="mx-2 mb-2 bg-white">
-        {taskItems.map((item, index) => (
-          <div
-            key={index}
-            className="p-3 flex items-center justify-between border-b last:border-b-0"
-          >
-            <div className="flex items-center">
-              <span className="mr-3">{item.icon}</span>
-              <span className="text-sm">{item.name}</span>
+        <Link href="/tasks">
+          {taskItems.map((item, index) => (
+            <div
+              key={index}
+              className="p-3 flex items-center justify-between border-b last:border-b-0"
+            >
+              <div className="flex items-center">
+                <span className="mr-3">{item.icon}</span>
+                <span className="text-sm">{item.name}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-xs text-gray-500 mr-2">{item.count}</span>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </div>
             </div>
-            <div className="flex items-center">
-              <span className="text-xs text-gray-500 mr-2">{item.count}</span>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
-            </div>
-          </div>
-        ))}
+          ))}
+        </Link>
       </Card>
 
       <div className="fixed bottom-4 right-4 flex flex-col items-end">

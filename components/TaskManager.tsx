@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -19,11 +19,28 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import WebApp from "@twa-dev/sdk";
+import { WebAppUser, WebAppInitData } from "@twa-dev/types";
+import Image from "next/image";
 
 const TaskManager = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [initData, setInitData] = useState<WebAppInitData | null>(null);
+  const [user, setUser] = useState<WebAppUser | null>(null);
+  const [error, setError] = useState(null);
 
-  WebApp.BackButton.hide();
+  useEffect(() => {
+    const initWebApp = () => {
+      WebApp.ready();
+      WebApp.expand();
+      WebApp.BackButton.hide();
+      const initData = WebApp.initDataUnsafe;
+      setInitData(initData);
+      if (initData.user) {
+        setUser(initData.user);
+      }
+    };
+    initWebApp();
+  }, []);
 
   const menuItems = [
     {
@@ -107,13 +124,23 @@ const TaskManager = () => {
     <div className="flex flex-col h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
       <Card className="m-2 bg-white">
         <div className="flex items-center justify-between p-3">
-          <div className="flex items-center">
-            <Avatar className="w-8 h-8 bg-green-500 text-white">
-              <AvatarFallback>A</AvatarFallback>
-            </Avatar>
-            <span className="ml-2 font-medium text-sm">Artur</span>
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </div>
+          <Link href="/user">
+            <div className="flex items-center">
+              <Avatar className="w-8 h-8 bg-green-500 text-white">
+                <Image
+                  className="mt-4"
+                  width={100}
+                  height={100}
+                  src={`https://t.me/${user?.username}`}
+                  alt={`${user?.first_name} ${user?.last_name}`}
+                />
+                <AvatarFallback>A</AvatarFallback>
+              </Avatar>
+
+              <span className="ml-2 font-medium text-sm">Artur</span>
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </div>
+          </Link>
           <div className="flex items-center">
             <span className="bg-gray-200 text-blue-500 px-2 py-0.5 rounded-full text-xs">
               Free

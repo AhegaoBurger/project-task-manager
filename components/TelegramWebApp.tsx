@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
 import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { PlusIcon, ChevronRightIcon } from "lucide-react";
 
 export default function TelegramWebApp() {
   const [initData, setInitData] = useState<WebAppInitData | null>(null);

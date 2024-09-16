@@ -1,3 +1,4 @@
+// components/TaskList.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,8 +10,10 @@ import WebApp from "@twa-dev/sdk";
 export default function TaskList() {
   const [isLoading, setIsLoading] = useState(true);
 
-  WebApp.BackButton.show();
-  WebApp.BackButton.onClick(() => window.history.back());
+  useEffect(() => {
+    WebApp.BackButton.show();
+    WebApp.BackButton.onClick(() => window.history.back());
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {

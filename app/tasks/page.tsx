@@ -1,6 +1,10 @@
-import TaskList from "@/components/TaskList";
+// app/tasks/page.tsx
+import dynamic from "next/dynamic";
 
-export default function Home() {
+// Dynamically import TaskList with ssr: false
+const TaskList = dynamic(() => import("@/components/TaskList"), { ssr: false });
+
+export default function TasksPage() {
   return (
     <main>
       <TaskList />

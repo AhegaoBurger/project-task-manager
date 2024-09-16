@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import WebApp from "@twa-dev/sdk";
 
 interface TaskFormProps {
   groupId?: any;
@@ -21,6 +22,8 @@ export default function TaskForm({
   const [createdBy, setCreatedBy] = useState(null);
 
   useEffect(() => {
+    WebApp.BackButton.show();
+    WebApp.BackButton.onClick(() => window.history.back());
     const getUser = async () => {
       const {
         data: { user },

@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import WebApp from "@twa-dev/sdk";
 
 interface Group {
   chatId: number; // or 'string', depending on your data
@@ -15,6 +16,8 @@ export default function GroupsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    WebApp.BackButton.show();
+    WebApp.BackButton.onClick(() => window.history.back());
     const fetchGroups = async () => {
       const response = await fetch("/api/getGroups");
       const data: { groups: Group[] } = await response.json();

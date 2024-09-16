@@ -57,6 +57,11 @@ const TaskManager = () => {
       count: "1/2",
     },
     { icon: <PlusIcon className="w-5 h-5 text-gray-500" />, name: "Add task" },
+    {
+      icon: <Inbox className="w-5 h-5 text-blue-500" />,
+      name: "Your Groups",
+      href: "/groups",
+    },
   ];
 
   const taskItems = [
@@ -96,7 +101,8 @@ const TaskManager = () => {
     {
       icon: <PlusCircle className="w-5 h-5 text-green-500" />,
       name: "New task",
-      subtext: 'Quickly add a task to "Incoming" or to a custom project',
+      subtext: 'Quickly add a task to "Inbox" or to a custom project',
+      href: "/add-task",
     },
     {
       icon: <PlusCircle className="w-5 h-5 text-blue-500" />,
@@ -153,26 +159,32 @@ const TaskManager = () => {
 
       {menuItems.map((item, index) => (
         <Card key={index} className="mx-2 mb-2 bg-white">
-          <div className="p-3 flex items-center justify-between">
-            <div className="flex items-center">
-              <span className="mr-3">{item.icon}</span>
-              <div>
-                <span className="text-sm">{item.name}</span>
-                {item.subtext && (
-                  <p className="text-xs text-gray-500 mt-0.5">{item.subtext}</p>
-                )}
+          <Link href={item.href || "#"}>
+            <div className="p-3 flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="mr-3">{item.icon}</span>
+                <div>
+                  <span className="text-sm">{item.name}</span>
+                  {item.subtext && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {item.subtext}
+                    </p>
+                  )}
+                </div>
               </div>
+              {item.count && (
+                <span className="text-xs text-gray-500">{item.count}</span>
+              )}
+              {item.action && (
+                <Button variant="ghost" className="text-blue-500 px-0 text-xs">
+                  {item.action}
+                </Button>
+              )}
+              {!item.action && (
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              )}
             </div>
-            {item.count && (
-              <span className="text-xs text-gray-500">{item.count}</span>
-            )}
-            {item.action && (
-              <Button variant="ghost" className="text-blue-500 px-0 text-xs">
-                {item.action}
-              </Button>
-            )}
-            {!item.action && <ChevronRight className="h-4 w-4 text-gray-400" />}
-          </div>
+          </Link>
         </Card>
       ))}
 
@@ -200,31 +212,35 @@ const TaskManager = () => {
         <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
           <DialogContent className="w-72 p-0 bg-white rounded-lg overflow-hidden mb-4">
             {popupItems.map((item, index) => (
-              <div
-                key={index}
-                className="p-3 flex items-start border-b last:border-b-0"
-              >
-                <span className="mr-3">{item.icon}</span>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-sm text-gray-900">
-                      {item.name}
-                    </span>
-                    {item.count && (
-                      <span className="text-xs text-gray-500">
-                        {item.count}
+              <Link key={index} href={item.href || "#"}>
+                <div
+                  key={index}
+                  className="p-3 flex items-start border-b last:border-b-0"
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-sm text-gray-900">
+                        {item.name}
                       </span>
-                    )}
-                    {item.badge && (
-                      <span className="bg-blue-500 text-white px-1.5 py-0.5 rounded-full text-xs">
-                        {item.badge}
-                      </span>
-                    )}
+                      {item.count && (
+                        <span className="text-xs text-gray-500">
+                          {item.count}
+                        </span>
+                      )}
+                      {item.badge && (
+                        <span className="bg-blue-500 text-white px-1.5 py-0.5 rounded-full text-xs">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {item.subtext}
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{item.subtext}</p>
+                  <ChevronRight className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
                 </div>
-                <ChevronRight className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
-              </div>
+              </Link>
             ))}
           </DialogContent>
           <DialogTrigger asChild>

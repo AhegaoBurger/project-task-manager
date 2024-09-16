@@ -3,13 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  ChevronLeft,
-  MoreVertical,
-  PlusIcon,
-  MessageCircle,
-} from "lucide-react";
-import Link from "next/link";
+import { PlusIcon, MessageCircle } from "lucide-react";
 import WebApp from "@twa-dev/sdk";
 
 export default function TaskList() {

@@ -4,7 +4,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function TaskForm({ groupId, assignedTo, onTaskCreated }) {
+interface TaskFormProps {
+  groupId?: any;
+  assignedTo?: any;
+  onTaskCreated: () => void;
+}
+
+export default function TaskForm({
+  groupId = null,
+  assignedTo = null,
+  onTaskCreated,
+}: TaskFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -26,24 +36,33 @@ export default function TaskForm({ groupId, assignedTo, onTaskCreated }) {
   }, []);
 
   const handleCreateTask = async () => {
+    if (!title || !createdBy) {
+      console.error("Title and createdBy are required");
+      return;
+    }
+
     const task = {
       title,
       description,
-      assigned_to: assignedTo || null,
+      assigned_to: assignedTo,
       group_id: groupId,
       created_by: createdBy,
       due_date: dueDate || null,
     };
 
-    await fetch("/api/createTask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    });
+    try {
+      await fetch("/api/createTask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(task),
+      });
 
-    // Notify parent component
-    if (onTaskCreated) {
-      onTaskCreated();
+      // Notify parent component
+      if (onTaskCreated) {
+        onTaskCreated();
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
     }
   };
 
@@ -57,6 +76,7 @@ export default function TaskForm({ groupId, assignedTo, onTaskCreated }) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         className="w-full mb-2"
+        required
       />
       <textarea
         placeholder="Task Description"

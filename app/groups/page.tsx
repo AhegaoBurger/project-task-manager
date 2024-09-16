@@ -4,14 +4,20 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+interface Group {
+  chatId: number; // or 'string', depending on your data
+  title: string;
+  type: string;
+}
+
 export default function GroupsPage() {
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGroups = async () => {
       const response = await fetch("/api/getGroups");
-      const data = await response.json();
+      const data: { groups: Group[] } = await response.json();
       setGroups(data.groups);
       setLoading(false);
     };

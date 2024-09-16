@@ -50,18 +50,18 @@ const TaskManager = () => {
       action: "Show",
     },
     {
-      icon: <PlusCircle className="w-5 h-5 text-green-500" />,
-      name: "Add to group chat",
-      subtext:
-        "A collaborative project is created by adding the bot to a Telegram group",
-      count: "1/2",
-    },
-    { icon: <PlusIcon className="w-5 h-5 text-gray-500" />, name: "Add task" },
-    {
       icon: <Inbox className="w-5 h-5 text-blue-500" />,
       name: "Your Groups",
       href: "/groups",
     },
+    // {
+    //   icon: <PlusCircle className="w-5 h-5 text-green-500" />,
+    //   name: "Add to group chat",
+    //   subtext:
+    //     "A collaborative project is created by adding the bot to a Telegram group",
+    //   count: "1/2",
+    // },
+    { icon: <PlusIcon className="w-5 h-5 text-gray-500" />, name: "Add task" },
   ];
 
   const taskItems = [
@@ -165,16 +165,8 @@ const TaskManager = () => {
                 <span className="mr-3">{item.icon}</span>
                 <div>
                   <span className="text-sm">{item.name}</span>
-                  {item.subtext && (
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {item.subtext}
-                    </p>
-                  )}
                 </div>
               </div>
-              {item.count && (
-                <span className="text-xs text-gray-500">{item.count}</span>
-              )}
               {item.action && (
                 <Button variant="ghost" className="text-blue-500 px-0 text-xs">
                   {item.action}

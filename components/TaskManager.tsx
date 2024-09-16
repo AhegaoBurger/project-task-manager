@@ -24,6 +24,7 @@ import Image from "next/image";
 
 const TaskManager = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [initData, setInitData] = useState<WebAppInitData | null>(null);
   const [user, setUser] = useState<WebAppUser | null>(null);
   const [error, setError] = useState(null);
 

@@ -7,6 +7,7 @@ import Image from "next/image";
 export default function TelegramWebApp() {
   const [initData, setInitData] = useState<WebAppInitData | null>(null);
   const [user, setUser] = useState<WebAppUser | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const initWebApp = () => {

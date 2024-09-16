@@ -1,20 +1,29 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import WebApp from "@twa-dev/sdk";
+import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import Image from "next/image";
 
 export default function Component() {
+  const [initData, setInitData] = useState<WebAppInitData | null>(null);
+  const [user, setUser] = useState<WebAppUser | null>(null);
+
   useEffect(() => {
     const initWebApp = () => {
       WebApp.ready();
       WebApp.expand();
       WebApp.BackButton.show();
       WebApp.BackButton.onClick(() => window.history.back());
+      const initData = WebApp.initDataUnsafe;
+      setInitData(initData);
+      if (initData.user) {
+        setUser(initData.user);
+      }
     };
     initWebApp();
   }, []);

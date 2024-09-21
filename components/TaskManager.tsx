@@ -46,7 +46,7 @@ const TaskManager = () => {
   const menuItems = [
     {
       icon: <MessageCircle className="w-5 h-5 text-blue-500" />,
-      name: "UTASKS NEWS",
+      name: "NEWS",
       action: "Show",
     },
     {

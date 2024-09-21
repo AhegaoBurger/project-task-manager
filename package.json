@@ -6,10 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "bot": "ts-node bot/bot.ts",
-    "dev:bot": "nodemon --watch bot bot/bot.ts",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev:bot\""
+    "lint": "next lint"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.0",

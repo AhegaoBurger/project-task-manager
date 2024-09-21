@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import WebApp from "@twa-dev/sdk";
+import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,38 +21,42 @@ export default function GroupDisplay() {
   const [error, setError] = useState<string | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
 
-  const fetchGroups = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/getGroups");
-      if (!response.ok) {
-        throw new Error("Failed to fetch groups");
+  useEffect(() => {
+    const initWebApp = () => {
+      WebApp.ready();
+      WebApp.expand();
+      WebApp.BackButton.show();
+      WebApp.BackButton.onClick(() => window.history.back());
+    };
+    initWebApp();
+
+    const fetchGroups = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch("/api/getGroups");
+        if (!response.ok) {
+          throw new Error("Failed to fetch groups");
+        }
+        const data: { groups: Group[] } = await response.json();
+        setGroups(data.groups);
+        setHasFetched(true);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred",
+        );
+      } finally {
+        setLoading(false);
       }
-      const data: { groups: Group[] } = await response.json();
-      setGroups(data.groups);
-      setHasFetched(true);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchGroups();
+  }, []);
 
   return (
     <Card className="m-4 p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Your Groups</h2>
-        <Button onClick={fetchGroups} disabled={loading}>
-          {loading ? (
-            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          {hasFetched ? "Refresh Groups" : "Fetch Groups"}
-        </Button>
       </div>
 
       {loading && (

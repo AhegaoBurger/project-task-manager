@@ -17,17 +17,32 @@ import {
   CalendarDays,
   CheckSquare,
   PlusCircle,
+  Users,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import WebApp from "@twa-dev/sdk";
 import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+interface Group {
+  chat_id: number;
+  title: string;
+  type: string;
+}
 
 const TaskManager = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [initData, setInitData] = useState<WebAppInitData | null>(null);
   const [user, setUser] = useState<WebAppUser | null>(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // New state variables for groups
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(false);
+  const [groupsError, setGroupsError] = useState<string | null>(null);
 
   useEffect(() => {
     const initWebApp = () => {
@@ -41,7 +56,39 @@ const TaskManager = () => {
       }
     };
     initWebApp();
+
+    // Fetch groups when the component mounts
+    fetchGroups();
   }, []);
+
+  const fetchGroups = async () => {
+    setGroupsLoading(true);
+    setGroupsError(null);
+    try {
+      const response = await fetch("/api/getGroups");
+      if (!response.ok) {
+        throw new Error("Failed to fetch groups");
+      }
+      const data: { groups: Group[] } = await response.json();
+      setGroups(data.groups);
+    } catch (err) {
+      setGroupsError(
+        err instanceof Error ? err.message : "An unknown error occurred",
+      );
+    } finally {
+      setGroupsLoading(false);
+    }
+  };
+
+  const handleAddBot = () => {
+    const botUsername = "TonYarnBot"; // Replace with your actual bot username
+    const parameter = "1";
+
+    // This URL will work for both groups and channels
+    const url = `https://t.me/${botUsername}?startgroup=${parameter}`;
+
+    WebApp.openTelegramLink(url);
+  };
 
   const menuItems = [
     {
@@ -49,18 +96,6 @@ const TaskManager = () => {
       name: "NEWS",
       action: "Show",
     },
-    {
-      icon: <Inbox className="w-5 h-5 text-blue-500" />,
-      name: "Your Groups",
-      href: "/groups",
-    },
-    // {
-    //   icon: <PlusCircle className="w-5 h-5 text-green-500" />,
-    //   name: "Add to group chat",
-    //   subtext:
-    //     "A collaborative project is created by adding the bot to a Telegram group",
-    //   count: "1/2",
-    // },
     { icon: <PlusIcon className="w-5 h-5 text-gray-500" />, name: "Add task" },
   ];
 
@@ -128,23 +163,31 @@ const TaskManager = () => {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
+    <div className="flex flex-col bg-gray-100 text-gray-900 max-w-md mx-auto">
       <Card className="m-2 bg-white">
         <div className="flex items-center justify-between p-3">
           <Link href="/user">
             <div className="flex items-center">
               <Avatar className="w-8 h-8 bg-green-500 text-white">
-                <Image
-                  className="mt-4"
-                  width={100}
-                  height={100}
-                  src={`https://t.me/${user?.username}`}
-                  alt={`${user?.first_name} ${user?.last_name}`}
-                />
-                <AvatarFallback>A</AvatarFallback>
+                {user?.photo_url ? (
+                  <Image
+                    className="rounded-full"
+                    width={32}
+                    height={32}
+                    src={user.photo_url}
+                    alt={`${user.first_name} ${user.last_name || ""}`}
+                  />
+                ) : (
+                  <AvatarFallback>
+                    {user?.first_name?.charAt(0)}
+                    {user?.last_name ? user.last_name.charAt(0) : ""}
+                  </AvatarFallback>
+                )}
               </Avatar>
 
-              <span className="ml-2 font-medium text-sm">Artur</span>
+              <span className="ml-2 font-medium text-sm">
+                {user?.first_name || "User"}
+              </span>
               <ChevronRight className="h-4 w-4 ml-1" />
             </div>
           </Link>
@@ -181,6 +224,33 @@ const TaskManager = () => {
       ))}
 
       <Card className="mx-2 mb-2 bg-white">
+        <div
+          className="p-3 flex items-center justify-between"
+          onClick={handleAddBot}
+        >
+          <div className="flex items-center">
+            <span className="mr-3">
+              <Inbox className="w-5 h-5 text-blue-500" />
+            </span>
+            <div>
+              <span className="text-sm">Your Groups</span>
+            </div>
+          </div>
+          <div className="flex items-center">
+            {/* Display the groups count */}
+            {groupsLoading ? (
+              <Skeleton className="h-4 w-4 mr-2" />
+            ) : (
+              <span className="text-xs text-gray-500 mr-2">
+                {groups.length}
+              </span>
+            )}
+            <ChevronRight className="h-4 w-4 text-gray-400" />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="mx-2 mb-2 bg-white">
         <Link href="/tasks">
           {taskItems.map((item, index) => (
             <div
@@ -199,6 +269,44 @@ const TaskManager = () => {
           ))}
         </Link>
       </Card>
+
+      {/* Display groups */}
+      {groupsLoading && (
+        <div className="space-y-2 px-2">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      )}
+
+      {groupsError && (
+        <Alert variant="destructive" className="mx-2 my-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{groupsError}</AlertDescription>
+        </Alert>
+      )}
+
+      {!groupsLoading && !groupsError && groups.length > 0 && (
+        <div className="space-y-2 mx-2 mb-2">
+          {groups.map((group) => (
+            <Card key={group.chat_id} className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Users className="h-5 w-5 text-blue-500" />
+                  <div>
+                    <p className="font-medium">{group.title}</p>
+                    <p className="text-sm text-gray-500 capitalize">
+                      {group.type}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card className="mx-2 mb-2 bg-white">
         <Link href="/testing">

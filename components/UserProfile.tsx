@@ -30,7 +30,7 @@ export default function Component() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-black text-white">
+    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-100 max-w-md mx-auto">
       {/* Profile Content */}
       <div className="flex-1 p-4">
         {/* Avatar */}
@@ -48,42 +48,42 @@ export default function Component() {
             </Avatar>
           </div>
           <h2 className="text-2xl font-bold">Artur Shirokov</h2>
-          <p className="text-gray-400">@Nth_Typonomy</p>
+          <p className="">@Nth_Typonomy</p>
         </div>
 
         {/* Menu Items */}
         <div className="space-y-4">
-          <Card className="bg-gray-900">
+          <Card className="bg-white">
             <Button variant="ghost" className="w-full justify-between py-6">
-              <span className="text-gray-400">Subscription</span>
+              <span className="">Subscription</span>
               <div className="flex items-center">
-                <span className="text-gray-400 mr-2">Free</span>
-                <ChevronRight className="text-gray-400" size={20} />
+                <span className=" mr-2">Free</span>
+                <ChevronRight className="h-4 w-4 text-gray-400" size={20} />
               </div>
             </Button>
           </Card>
 
-          <Card className="bg-gray-900">
+          <Card className="bg-gray-100">
             <Button variant="ghost" className="w-full justify-between py-6">
-              <span className="text-gray-400">Settings</span>
-              <ChevronRight className="text-gray-400" size={20} />
+              <span className="">Settings</span>
+              <ChevronRight className="h-4 w-4 text-gray-400" size={20} />
             </Button>
           </Card>
 
-          <Card className="bg-gray-900 space-y-1">
+          <Card className="bg-gray-100 space-y-1">
             {["About us", "Support", "News"].map((item, index) => (
               <Button
                 key={index}
                 variant="ghost"
                 className="w-full justify-between py-6"
               >
-                <span className="text-gray-400">{item}</span>
-                <ChevronRight className="text-gray-400" size={20} />
+                <span className="">{item}</span>
+                <ChevronRight className="h-4 w-4 text-gray-400" size={20} />
               </Button>
             ))}
           </Card>
 
-          <Card className="bg-gray-900 space-y-1">
+          <Card className="bg-gray-100 space-y-1">
             {["Terms of use", "Privacy policy", "Payment policy"].map(
               (item, index) => (
                 <Button
@@ -91,8 +91,8 @@ export default function Component() {
                   variant="ghost"
                   className="w-full justify-between py-6"
                 >
-                  <span className="text-gray-400">{item}</span>
-                  <ChevronRight className="text-gray-400" size={20} />
+                  <span className="">{item}</span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" size={20} />
                 </Button>
               ),
             )}

@@ -24,7 +24,7 @@ export default function TaskList() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-black text-white">
+    <div className="flex flex-col h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
       {/* Content */}
       <div className="flex-1 p-4">
         {/* Task Icon and Title */}
@@ -35,13 +35,13 @@ export default function TaskList() {
 
         {/* Task Filters */}
         <div className="flex space-x-2 mb-4">
-          <Button variant="outline" className="bg-gray-800 text-blue-400">
+          <Button variant="outline" className="bg-gray-100">
             All 0
           </Button>
-          <Button variant="outline" className="bg-gray-900 text-gray-400">
+          <Button variant="outline" className="bg-gray-100">
             Author 0
           </Button>
-          <Button variant="outline" className="bg-gray-900 text-gray-400">
+          <Button variant="outline" className="bg-gray-100">
             Assignee 0
           </Button>
         </div>
@@ -52,9 +52,9 @@ export default function TaskList() {
         </Button>
 
         {/* Loading or Content */}
-        <Card className="bg-gray-900 p-6">
+        <Card className="bg-gray-100 p-6">
           {isLoading ? (
-            <p className="text-center text-gray-400">Loading all tasks...</p>
+            <p className="text-center">Loading all tasks...</p>
           ) : (
             <div className="text-center">
               <svg
@@ -65,17 +65,17 @@ export default function TaskList() {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <circle cx="60" cy="60" r="58" stroke="white" strokeWidth="4" />
+                <circle cx="60" cy="60" r="58" stroke="grey" strokeWidth="4" />
                 <path
                   d="M35 60L55 80L85 40"
-                  stroke="white"
+                  stroke="grey"
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
               <h2 className="text-xl font-bold mb-2">All good!</h2>
-              <p className="text-gray-400">
+              <p className="">
                 Add new tasks via quick-create button or open a full task
                 creation form
               </p>

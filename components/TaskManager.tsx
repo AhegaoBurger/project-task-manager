@@ -50,23 +50,34 @@ const TaskManager = () => {
       WebApp.expand();
       WebApp.BackButton.hide();
       const initData = WebApp.initDataUnsafe;
-      setInitData(initData);
       if (initData.user) {
         setUser(initData.user);
       }
     };
     initWebApp();
-
-    // Fetch groups when the component mounts
-    fetchGroups();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchGroups();
+    }
+  }, [user]);
 
   const fetchGroups = async () => {
     setGroupsLoading(true);
     setGroupsError(null);
     try {
-      const response = await fetch("/api/getGroups");
+      const response = await fetch(`/api/getGroups`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user?.id,
+        }),
+      });
       if (!response.ok) {
+        console.log("Failed to fetch groups", response.json());
         throw new Error("Failed to fetch groups");
       }
       const data: { groups: Group[] } = await response.json();

@@ -26,17 +26,16 @@ async function ensureBotInfo() {
 bot.on("my_chat_member", async (ctx) => {
   const chat = ctx.chat;
   const newStatus = ctx.update.my_chat_member.new_chat_member.status;
+  const userId = ctx.update.my_chat_member.from.id; // The user who performed the action
   try {
     let title: string;
     if (chat.type === "private") {
-      // Private chat with a user
       title = `${chat.first_name} ${chat.last_name || ""}`;
     } else if (
       chat.type === "group" ||
       chat.type === "supergroup" ||
       chat.type === "channel"
     ) {
-      // Group, Supergroup, or Channel
       title = chat.title;
     } else {
       title = "Unknown Chat";
@@ -46,12 +45,13 @@ bot.on("my_chat_member", async (ctx) => {
       // Bot is an administrator
       await supabase.from("chats").upsert({
         chat_id: chat.id,
+        user_id: userId,
         title: title,
         type: chat.type,
         date_added: new Date(),
         is_admin: true,
       });
-      console.log(`Added or updated chat: ${title}`);
+      console.log(`Added or updated chat: ${title} by user ID: ${userId}`);
     } else {
       // Bot is not an administrator (demoted, left, kicked)
       await supabase.from("chats").delete().eq("chat_id", chat.id);

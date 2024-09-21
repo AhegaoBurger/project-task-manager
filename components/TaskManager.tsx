@@ -33,6 +33,13 @@ interface Group {
   type: string;
 }
 
+interface MenuItem {
+  icon: React.ReactElement;
+  name: string;
+  action?: string;
+  href?: string;
+}
+
 const TaskManager = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [initData, setInitData] = useState<WebAppInitData | null>(null);
@@ -77,7 +84,7 @@ const TaskManager = () => {
         }),
       });
       if (!response.ok) {
-        console.log("Failed to fetch groups", response.json());
+        console.log("Failed to fetch groups", await response.json());
         throw new Error("Failed to fetch groups");
       }
       const data: { groups: Group[] } = await response.json();
@@ -101,13 +108,18 @@ const TaskManager = () => {
     WebApp.openTelegramLink(url);
   };
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     {
       icon: <MessageCircle className="w-5 h-5 text-blue-500" />,
       name: "NEWS",
       action: "Show",
+      href: "/news", // Define the actual route
     },
-    { icon: <PlusIcon className="w-5 h-5 text-gray-500" />, name: "Add task" },
+    {
+      icon: <PlusIcon className="w-5 h-5 text-gray-500" />,
+      name: "Add task",
+      href: "/add-task", // Define the actual route
+    },
   ];
 
   const taskItems = [
@@ -221,12 +233,11 @@ const TaskManager = () => {
                   <span className="text-sm">{item.name}</span>
                 </div>
               </div>
-              {item.action && (
+              {item.action ? (
                 <Button variant="ghost" className="text-blue-500 px-0 text-xs">
                   {item.action}
                 </Button>
-              )}
-              {!item.action && (
+              ) : (
                 <ChevronRight className="h-4 w-4 text-gray-400" />
               )}
             </div>
@@ -339,10 +350,7 @@ const TaskManager = () => {
           <DialogContent className="w-72 p-0 bg-white rounded-lg overflow-hidden mb-4">
             {popupItems.map((item, index) => (
               <Link key={index} href={item.href || "#"}>
-                <div
-                  key={index}
-                  className="p-3 flex items-start border-b last:border-b-0"
-                >
+                <div className="p-3 flex items-start border-b last:border-b-0">
                   <span className="mr-3">{item.icon}</span>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">

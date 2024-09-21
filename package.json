@@ -34,7 +34,8 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "telegraf": "^4.16.3",
-    "telegram": "^2.24.11"
+    "telegram": "^2.24.11",
+    "typegram": "^5.2.0"
   },
   "devDependencies": {
     "@types/node": "20.16.5",

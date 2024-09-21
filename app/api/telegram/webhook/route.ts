@@ -1,7 +1,8 @@
 // app/api/telegram/webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { Telegraf, Context, TelegramError } from "telegraf";
+import { Telegraf, TelegramError, Context } from "telegraf";
 import { createClient } from "@supabase/supabase-js";
+import { Chat, ChatMember } from "typegram";
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -10,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 // Initialize Telegram Bot
 const botToken = process.env.TELEGRAM_BOT_TOKEN!;
-const bot = new Telegraf(botToken);
+const bot = new Telegraf<Context>(botToken);
 
 // Middleware to use the webhookReply (for performance)
 bot.telegram.webhookReply = false;
@@ -22,24 +23,31 @@ async function ensureBotInfo() {
   }
 }
 
+// Helper function to safely get chat title
+function getChatTitle(chat: Chat): string {
+  switch (chat.type) {
+    case "private":
+      return (
+        `${(chat as any).first_name || ""} ${(chat as any).last_name || ""}`.trim() ||
+        "Private Chat"
+      );
+    case "group":
+    case "supergroup":
+    case "channel":
+      return (chat as any).title || "Unknown Chat";
+    default:
+      return "Unknown Chat";
+  }
+}
+
 // Bot Logic
 bot.on("my_chat_member", async (ctx) => {
   const chat = ctx.chat;
   const newStatus = ctx.update.my_chat_member.new_chat_member.status;
   const userId = ctx.update.my_chat_member.from.id; // The user who performed the action
+
   try {
-    let title: string;
-    if (chat.type === "private") {
-      title = `${chat.first_name} ${chat.last_name || ""}`;
-    } else if (
-      chat.type === "group" ||
-      chat.type === "supergroup" ||
-      chat.type === "channel"
-    ) {
-      title = chat.title;
-    } else {
-      title = "Unknown Chat";
-    }
+    const title = getChatTitle(chat);
 
     if (newStatus === "administrator") {
       // Bot is an administrator
@@ -67,28 +75,32 @@ bot.on("message", async (ctx) => {
   try {
     await ensureBotInfo(); // Ensure bot.botInfo is initialized
 
+    if (!bot.botInfo) {
+      throw new Error("Bot info is not initialized");
+    }
+
     if (chat.type === "private") {
       // Private chat with a user
-      const title = `${chat.first_name} ${chat.last_name || ""}`;
+      const title = getChatTitle(chat);
       await supabase.from("chats").upsert({
         chat_id: chat.id,
         title: title,
         type: chat.type,
         date_added: new Date(),
       });
-      console.log(`Recorded private chat with user: ${chat.first_name}`);
+      console.log(
+        `Recorded private chat with user: ${(chat as any).first_name}`,
+      );
     } else if (chat.type === "group" || chat.type === "supergroup") {
       // Try to get the bot's membership status
-      let chatMember;
+      let chatMember: ChatMember;
       try {
         chatMember = await ctx.telegram.getChatMember(chat.id, bot.botInfo.id);
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof TelegramError && error.code === 403) {
           // Bot is not a member of the chat
           console.log(
-            `Bot is not a member of the chat: ${
-              (chat as any).title || "Unknown Chat"
-            }, skipping upsert`,
+            `Bot is not a member of the chat: ${getChatTitle(chat)}, skipping upsert`,
           );
           return; // Exit the handler
         } else {
@@ -98,7 +110,7 @@ bot.on("message", async (ctx) => {
 
       if (chatMember.status === "administrator") {
         // Bot is an administrator, upsert the chat
-        const title = chat.title;
+        const title = getChatTitle(chat);
         await supabase.from("chats").upsert({
           chat_id: chat.id,
           title: title,
@@ -109,7 +121,9 @@ bot.on("message", async (ctx) => {
         console.log(`Recorded group message in: ${title}`);
       } else {
         // Bot is not an administrator, do not upsert
-        console.log(`Bot is not admin in: ${chat.title}, skipping upsert`);
+        console.log(
+          `Bot is not admin in: ${getChatTitle(chat)}, skipping upsert`,
+        );
       }
     }
   } catch (error) {
@@ -123,17 +137,19 @@ bot.on("channel_post", async (ctx) => {
   try {
     await ensureBotInfo(); // Ensure bot.botInfo is initialized
 
+    if (!bot.botInfo) {
+      throw new Error("Bot info is not initialized");
+    }
+
     // Try to get the bot's membership status
-    let chatMember;
+    let chatMember: ChatMember;
     try {
       chatMember = await ctx.telegram.getChatMember(chat.id, bot.botInfo.id);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof TelegramError && error.code === 403) {
         // Bot is not a member of the channel
         console.log(
-          `Bot is not a member of the channel: ${
-            (chat as any).title || "Unknown Channel"
-          }, skipping upsert`,
+          `Bot is not a member of the channel: ${getChatTitle(chat)}, skipping upsert`,
         );
         return; // Exit the handler
       } else {
@@ -142,7 +158,7 @@ bot.on("channel_post", async (ctx) => {
     }
 
     if (chatMember.status === "administrator") {
-      const title = chat.title;
+      const title = getChatTitle(chat);
       await supabase.from("chats").upsert({
         chat_id: chat.id,
         title: title,
@@ -153,7 +169,7 @@ bot.on("channel_post", async (ctx) => {
       console.log(`Recorded channel post in: ${title}`);
     } else {
       console.log(
-        `Bot is not admin in channel: ${chat.title}, skipping upsert`,
+        `Bot is not admin in channel: ${getChatTitle(chat)}, skipping upsert`,
       );
     }
   } catch (error) {
@@ -167,10 +183,11 @@ export async function POST(request: NextRequest) {
     const update = await request.json();
     await bot.handleUpdate(update);
     return NextResponse.json({ status: "ok" });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error handling update:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { status: "error", message: (error as Error).message },
+      { status: "error", message: message },
       { status: 500 },
     );
   }

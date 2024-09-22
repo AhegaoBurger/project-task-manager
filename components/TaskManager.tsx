@@ -99,7 +99,8 @@ const TaskManager = () => {
   };
 
   const handleAddBot = () => {
-    const botUsername = "TonYarnBot"; // Replace with your actual bot username
+    // const botUsername = "TonYarnBot"; // Dev
+    const botUsername = "managingtasksbot"; // Live
     const parameter = "1";
 
     // This URL will work for both groups and channels

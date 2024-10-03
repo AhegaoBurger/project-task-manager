@@ -14,7 +14,7 @@ export default function AddTaskPage() {
   };
 
   return (
-    <div className="p-4">
+    <div className="">
       <TaskForm onTaskCreated={handleTaskCreated} />
     </div>
   );

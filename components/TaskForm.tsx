@@ -33,23 +33,20 @@ export default function TaskForm({
   const [createdBy, setCreatedBy] = useState(null);
 
   useEffect(() => {
+    console.log("TaskForm mounted");
     WebApp.BackButton.show();
     WebApp.BackButton.onClick(() => window.history.back());
-    const getUser = async () => {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-      if (user) {
-        setCreatedBy(user.user_metadata.telegram_id);
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setCreatedBy(session.user.id);
       } else {
         console.error("User not authenticated");
       }
-    };
-    getUser();
+    });
   }, []);
 
   const handleCreateTask = async () => {
+    console.log("Creating task");
     if (!title || !createdBy) {
       console.error("Title and createdBy are required");
       return;
@@ -64,13 +61,23 @@ export default function TaskForm({
       due_date: dueDate ? format(dueDate, "yyyy-MM-dd") : null,
     };
 
+    console.log("Task data:", task);
+
     try {
-      await fetch("/api/createTask", {
+      const response = await fetch("/api/createTask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(task),
       });
 
+      const data = await response.json();
+      console.log("Server response:", data);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create task");
+      }
+
+      console.log("Task created successfully");
       // Notify parent component
       if (onTaskCreated) {
         onTaskCreated();

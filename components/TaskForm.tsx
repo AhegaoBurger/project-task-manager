@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import WebApp from "@twa-dev/sdk";
+import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,35 +31,42 @@ export default function TaskForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
-  const [createdBy, setCreatedBy] = useState(null);
+  const [user, setUser] = useState<WebAppUser | null>(null);
+  const [initData, setInitData] = useState<WebAppInitData | null>(null);
 
   useEffect(() => {
     console.log("TaskForm mounted");
     WebApp.BackButton.show();
     WebApp.BackButton.onClick(() => window.history.back());
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setCreatedBy(session.user.id);
-      } else {
-        console.error("User not authenticated");
-      }
-    });
+    // Get user data from Telegram initData
+    const initData = WebApp.initDataUnsafe;
+    setInitData(initData);
+    if (initData.user) {
+      console.log("User from Telegram initData:", initData.user);
+      setUser(initData?.user); // Use Telegram user ID
+      createOrUpdateProfile(initData.user);
+    } else {
+      console.error("User not available in Telegram initData");
+    }
   }, []);
 
   const handleCreateTask = async () => {
     console.log("Creating task");
-    if (!title || !createdBy) {
-      console.error("Title and createdBy are required");
+    if (!title || !user) {
+      console.error("Title and user are required");
       return;
     }
+
+    const initData = WebApp.initData || "";
 
     const task = {
       title,
       description,
       assigned_to: assignedTo,
       group_id: groupId,
-      created_by: createdBy,
+      created_by: user?.id,
       due_date: dueDate ? format(dueDate, "yyyy-MM-dd") : null,
+      initData,
     };
 
     console.log("Task data:", task);
@@ -78,12 +86,31 @@ export default function TaskForm({
       }
 
       console.log("Task created successfully");
-      // Notify parent component
       if (onTaskCreated) {
         onTaskCreated();
       }
     } catch (error) {
       console.error("Error creating task:", error);
+    }
+  };
+
+  const createOrUpdateProfile = async (user: WebAppUser) => {
+    try {
+      const { data, error } = await supabase.from("profiles").upsert(
+        {
+          telegram_id: user.id,
+          username: user.username,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          photo_url: user.photo_url,
+        },
+        { onConflict: "telegram_id" },
+      );
+      if (error) {
+        console.error("Error upserting profile:", error);
+      }
+    } catch (error) {
+      console.error("Error in createOrUpdateProfile:", error);
     }
   };
 

@@ -1,20 +1,21 @@
 // app/api/createTask/route.ts
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import crypto from "crypto";
 
-interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  assigned_to?: string;
-  group_id: number;
-  created_by: string;
-  due_date?: string;
-  created_at: string;
-  updated_at: string;
-}
+// interface Task {
+//   id: string;
+//   title: string;
+//   description?: string;
+//   assigned_to?: string;
+//   group_id: number;
+//   created_by: string;
+//   due_date?: string;
+//   created_at: string;
+//   updated_at: string;
+// }
 
-type TaskInsert = Omit<Task, "id" | "created_at" | "updated_at">;
+// type TaskInsert = Omit<Task, "id" | "created_at" | "updated_at">;
 
 export async function POST(request: Request) {
   console.log("POST request received in createTask route");
@@ -24,7 +25,40 @@ export async function POST(request: Request) {
   const { title, description, assigned_to, group_id, created_by, due_date } =
     body;
 
+  const telegramUserId = created_by; // This should be a number
+
   try {
+    // Fetch or create the user's profile using the Telegram user ID
+    let { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("telegram_id", telegramUserId)
+      .single();
+
+    if (profileError && profileError.code === "PGRST116") {
+      // Profile does not exist; create it
+      const { data: newProfile, error: insertError } = await supabase
+        .from("profiles")
+        .insert({
+          telegram_id: telegramUserId,
+          // You can insert additional fields if you have them
+        })
+        .select("id")
+        .single();
+
+      if (insertError) {
+        console.error("Error creating new profile:", insertError);
+        throw new Error("Error creating user profile");
+      }
+
+      profile = newProfile;
+    } else if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      throw new Error("Error fetching user profile");
+    }
+
+    const userId = profile?.id; // UUID from your database
+
     console.log("Attempting to insert task into database");
     const { data, error } = await supabase
       .from("tasks")
@@ -34,7 +68,7 @@ export async function POST(request: Request) {
           description,
           assigned_to,
           group_id,
-          created_by,
+          created_by: userId, // Ensure it's a string
           due_date,
         },
       ])

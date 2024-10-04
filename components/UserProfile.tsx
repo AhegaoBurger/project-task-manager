@@ -30,7 +30,7 @@ export default function Component() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-100 max-w-md mx-auto">
+    <div className="flex flex-col min-h-screen bg-gray-100 max-w-md mx-auto">
       {/* Profile Content */}
       <div className="flex-1 p-4">
         {/* Avatar */}
@@ -47,8 +47,10 @@ export default function Component() {
               <AvatarFallback>A</AvatarFallback>
             </Avatar>
           </div>
-          <h2 className="text-2xl font-bold">Artur Shirokov</h2>
-          <p className="">@Nth_Typonomy</p>
+          <h2 className="text-2xl font-bold">
+            {user?.first_name} {user?.last_name || ""}
+          </h2>
+          <p className="">{user?.username}</p>
         </div>
 
         {/* Menu Items */}

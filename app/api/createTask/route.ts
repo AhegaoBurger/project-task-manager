@@ -3,19 +3,19 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import crypto from "crypto";
 
-// interface Task {
-//   id: string;
-//   title: string;
-//   description?: string;
-//   assigned_to?: string;
-//   group_id: number;
-//   created_by: string;
-//   due_date?: string;
-//   created_at: string;
-//   updated_at: string;
-// }
+interface Task {
+  id: string; // UUID, primary key
+  title: string;
+  description?: string; // Optional
+  assigned_to?: string | null; // UUID or null
+  group_id?: number | null; // Number or null
+  created_by: string; // UUID referencing profiles.id
+  due_date?: string | null; // ISO date string or null
+  created_at: string; // ISO date string, automatically generated
+  updated_at: string; // ISO date string, automatically generated
+}
 
-// type TaskInsert = Omit<Task, "id" | "created_at" | "updated_at">;
+type TaskInsert = Omit<Task, "id" | "created_at" | "updated_at">;
 
 export async function POST(request: Request) {
   console.log("POST request received in createTask route");

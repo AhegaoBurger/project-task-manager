@@ -22,8 +22,23 @@ export async function POST(request: Request) {
   const body = await request.json();
   console.log("Request body:", body);
 
-  const { title, description, assigned_to, group_id, created_by, due_date } =
-    body;
+  const {
+    title,
+    description,
+    assigned_to,
+    group_id,
+    created_by,
+    due_date,
+    initData,
+  } = body;
+
+  console.log("title:", title);
+  console.log("description:", description);
+  console.log("assigned_to:", assigned_to);
+  console.log("group_id:", group_id);
+  console.log("created_by:", created_by);
+  console.log("due_date:", due_date);
+  console.log("initData:", initData);
 
   const telegramUserId = created_by; // This should be a number
 
@@ -35,27 +50,33 @@ export async function POST(request: Request) {
       .eq("telegram_id", telegramUserId)
       .single();
 
-    if (profileError && profileError.code === "PGRST116") {
-      // Profile does not exist; create it
-      const { data: newProfile, error: insertError } = await supabase
-        .from("profiles")
-        .insert({
-          telegram_id: telegramUserId,
-          // You can insert additional fields if you have them
-        })
-        .select("id")
-        .single();
+    // if (profileError && profileError.code === "PGRST116") {
+    //   const userData = parseInitDataUser(initData);
 
-      if (insertError) {
-        console.error("Error creating new profile:", insertError);
-        throw new Error("Error creating user profile");
-      }
+    //   // Profile does not exist; create it
+    //   const { data: newProfile, error: insertError } = await supabase
+    //     .from("profiles")
+    //     .insert({
+    //       id: user.id,
+    //       telegram_id: telegramUserId,
+    //       username: userData.username || "Unknown",
+    //       full_name: userData.first_name || "Unknown",
+    //       avatar_url: userData.photo_url || "",
+    //       // You can insert additional fields if you have them
+    //     })
+    //     .select("id")
+    //     .single();
 
-      profile = newProfile;
-    } else if (profileError) {
-      console.error("Error fetching user profile:", profileError);
-      throw new Error("Error fetching user profile");
-    }
+    //   if (insertError) {
+    //     console.error("Error creating new profile:", insertError);
+    //     throw new Error("Error creating user profile");
+    //   }
+
+    //   profile = newProfile;
+    // } else if (profileError) {
+    //   console.error("Error fetching user profile:", profileError);
+    //   throw new Error("Error fetching user profile");
+    // }
 
     const userId = profile?.id; // UUID from your database
 
@@ -68,7 +89,7 @@ export async function POST(request: Request) {
           description,
           assigned_to,
           group_id,
-          created_by: userId, // Ensure it's a string
+          created_by: created_by, // Ensure it's a string
           due_date,
         },
       ])
@@ -191,4 +212,19 @@ async function sendTaskNotification(task: Task) {
     console.error("Error in sendTaskNotification:", error);
     throw error;
   }
+}
+
+// Helper function to parse user data from initData
+function parseInitDataUser(initData: string): any {
+  const parsedData = new URLSearchParams(initData);
+  const userString = parsedData.get("user");
+  if (userString) {
+    try {
+      return JSON.parse(userString);
+    } catch (error) {
+      console.error("Error parsing user data from initData:", error);
+      return {};
+    }
+  }
+  return {};
 }

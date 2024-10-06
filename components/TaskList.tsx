@@ -109,23 +109,32 @@ export default function TaskList({
   const handleAddTask = () => {
     setIsAddingTask(!isAddingTask);
     setNewTask({ title: "", description: "" });
+    setError(null); // Clear any existing errors
+  };
+
+  const handleCloseAddTask = () => {
+    setIsAddingTask(false);
+    setNewTask({ title: "", description: "" });
+    setError(null); // Clear any existing errors
   };
 
   const handleCreateTask = async () => {
     console.log("Creating task");
-    if (!title || !user) {
+    if (!newTask.title.trim() || !user) {
+      // Added trim to check for empty strings
       console.error("Title and user are required");
+      setError("Title is required.");
       return;
     }
 
     const initData = WebApp.initData || "";
 
     const task = {
-      title,
-      description,
+      title: newTask.title.trim(),
+      description: newTask.description.trim(),
       assigned_to: assignedTo,
       group_id: groupId,
-      created_by: user?.id,
+      created_by: user.id,
       due_date: dueDate ? format(dueDate, "yyyy-MM-dd") : null,
       initData,
     };
@@ -147,9 +156,20 @@ export default function TaskList({
       }
 
       console.log("Task created successfully");
-      if (onTaskCreated) {
-        onTaskCreated();
-      }
+
+      // if (onTaskCreated) {
+      //   onTaskCreated();
+      // }
+
+      // Optimistically update tasks state with the new task
+      setTasks((prevTasks) => [data.task, ...prevTasks]);
+
+      // Close the Add Task form and reset input fields
+      setIsAddingTask(false);
+      setNewTask({ title: "", description: "" });
+
+      // Clear any existing errors
+      setError(null);
     } catch (error) {
       console.error("Error creating task:", error);
     }
@@ -169,9 +189,11 @@ export default function TaskList({
       );
       if (error) {
         console.error("Error upserting profile:", error);
+        setError("Failed to update profile.");
       }
     } catch (error) {
       console.error("Error in createOrUpdateProfile:", error);
+      setError("Failed to update profile.");
     }
   };
 
@@ -206,15 +228,23 @@ export default function TaskList({
                   <Input
                     className="ml-2 flex-grow"
                     placeholder="Task title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    // value={title}
+                    value={newTask.title}
+                    // onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) =>
+                      setNewTask({ ...newTask, title: e.target.value })
+                    }
                     required
                   />
                 </div>
                 <Textarea
                   placeholder="Description..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  // value={description}
+                  // onChange={(e) => setDescription(e.target.value)}
+                  value={newTask.description}
+                  onChange={(e) =>
+                    setNewTask({ ...newTask, description: e.target.value })
+                  }
                 />
                 <div className="flex items-center text-gray-500">
                   <Paperclip className="h-4 w-4 mr-2" />

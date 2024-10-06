@@ -117,19 +117,6 @@ export default function TaskForm({
   return (
     <div className="flex flex-col h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
       <Card className="m-2 bg-white">
-        <div className="flex items-center p-3">
-          <Button
-            variant="ghost"
-            onClick={() => window.history.back()}
-            className="mr-2"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <h2 className="text-lg font-semibold">Create a New Task</h2>
-        </div>
-      </Card>
-
-      <Card className="m-2 bg-white">
         <div className="p-4 space-y-4">
           <Input
             type="text"

@@ -206,18 +206,15 @@ export default function TaskList({
                   <Input
                     className="ml-2 flex-grow"
                     placeholder="Task title"
-                    value={newTask.title}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, title: e.target.value })
-                    }
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
                   />
                 </div>
                 <Textarea
                   placeholder="Description..."
-                  value={newTask.description}
-                  onChange={(e) =>
-                    setNewTask({ ...newTask, description: e.target.value })
-                  }
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
                 <div className="flex items-center text-gray-500">
                   <Paperclip className="h-4 w-4 mr-2" />

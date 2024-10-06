@@ -331,21 +331,6 @@ const TaskManager = () => {
         </div>
       )}
 
-      <Card className="mx-2 mb-2 bg-white">
-        <Link href="/testing">
-          <div className="p-3 flex items-center justify-between border-b last:border-b-0">
-            <div className="flex items-center">
-              <span className="mr-3"></span>
-              <span className="text-sm">Testing</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-xs text-gray-500 mr-2">1</span>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
-            </div>
-          </div>
-        </Link>
-      </Card>
-
       <div className="fixed bottom-4 right-4 flex flex-col items-end">
         <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
           <DialogContent className="w-72 p-0 bg-white rounded-lg overflow-hidden mb-4">

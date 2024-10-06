@@ -1,4 +1,6 @@
 // app/tasks/page.tsx
+"use client";
+
 import dynamic from "next/dynamic";
 
 // Dynamically import TaskList with ssr: false

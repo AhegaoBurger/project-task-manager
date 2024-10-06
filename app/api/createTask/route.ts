@@ -50,34 +50,6 @@ export async function POST(request: Request) {
       .eq("telegram_id", telegramUserId)
       .single();
 
-    // if (profileError && profileError.code === "PGRST116") {
-    //   const userData = parseInitDataUser(initData);
-
-    //   // Profile does not exist; create it
-    //   const { data: newProfile, error: insertError } = await supabase
-    //     .from("profiles")
-    //     .insert({
-    //       id: user.id,
-    //       telegram_id: telegramUserId,
-    //       username: userData.username || "Unknown",
-    //       full_name: userData.first_name || "Unknown",
-    //       avatar_url: userData.photo_url || "",
-    //       // You can insert additional fields if you have them
-    //     })
-    //     .select("id")
-    //     .single();
-
-    //   if (insertError) {
-    //     console.error("Error creating new profile:", insertError);
-    //     throw new Error("Error creating user profile");
-    //   }
-
-    //   profile = newProfile;
-    // } else if (profileError) {
-    //   console.error("Error fetching user profile:", profileError);
-    //   throw new Error("Error fetching user profile");
-    // }
-
     const userId = profile?.id; // UUID from your database
 
     console.log("Attempting to insert task into database");

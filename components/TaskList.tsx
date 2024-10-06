@@ -1,61 +1,141 @@
-// components/TaskList.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PlusIcon, MessageCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  ChevronLeft,
+  MoreVertical,
+  Plus,
+  Calendar,
+  RotateCw,
+  Flag,
+  Inbox,
+} from "lucide-react";
 import WebApp from "@twa-dev/sdk";
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string | null;
+  assigned_to?: string | null;
+  group_id?: number | null;
+  created_by: string;
+  due_date?: string | null;
+  created_at: string;
+  updated_at: string;
+  category?: string;
+}
 
 export default function TaskList() {
   const [isLoading, setIsLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     WebApp.BackButton.show();
     WebApp.BackButton.onClick(() => window.history.back());
-  }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch("/api/getTasks", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-    return () => clearTimeout(timer);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch tasks");
+        }
+
+        const data = await response.json();
+        setTasks(data.tasks);
+      } catch (err: any) {
+        console.error("Error fetching tasks:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTasks();
   }, []);
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
-      {/* Content */}
-      <div className="flex-1 p-4">
-        {/* Task Icon and Title */}
-        <div className="flex items-center mb-4">
-          <MessageCircle className="text-blue-500 mr-2" size={24} />
-          <span className="text-xl">All</span>
-        </div>
-
-        {/* Task Filters */}
-        <div className="flex space-x-2 mb-4">
-          <Button variant="outline" className="bg-gray-100">
-            All 0
-          </Button>
-          <Button variant="outline" className="bg-gray-100">
-            Author 0
-          </Button>
-          <Button variant="outline" className="bg-gray-100">
-            Assignee 0
+      <Card className="m-2 bg-white">
+        <div className="flex items-center justify-between p-3">
+          <div className="flex items-center">
+            <Button variant="ghost" className="mr-2">
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg font-semibold">UTasks | Task Manager</h1>
+          </div>
+          <Button variant="ghost" size="icon">
+            <MoreVertical className="h-5 w-5" />
           </Button>
         </div>
+      </Card>
 
-        {/* Add Task Button */}
-        <Button variant="outline" className="w-full mb-4 justify-start">
-          <PlusIcon className="mr-2" /> Add task
-        </Button>
+      <Card className="mx-2 mb-2 bg-white">
+        <div className="p-4">
+          <h2 className="text-xl font-bold mb-4">All</h2>
+          <div className="flex space-x-2 mb-4">
+            <Button variant="outline" className="bg-gray-100">
+              All {tasks.length}
+            </Button>
+            <Button variant="outline" className="bg-gray-100">
+              Author {tasks.length}
+            </Button>
+            <Button variant="outline" className="bg-gray-100">
+              Assignee {tasks.length}
+            </Button>
+          </div>
 
-        {/* Loading or Content */}
-        <Card className="bg-gray-100 p-6">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-start">
+                <Plus className="mr-2 h-4 w-4" /> Add task
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="grid gap-4">
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Today</span>
+                </div>
+                <div className="flex items-center">
+                  <RotateCw className="mr-2 h-4 w-4" />
+                  <span>Repeat</span>
+                </div>
+                <div className="flex items-center">
+                  <Flag className="mr-2 h-4 w-4" />
+                  <span className="text-purple-600">Date due</span>
+                  <span className="ml-1 text-xs bg-purple-100 text-purple-600 px-1 rounded">
+                    Pro
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <Inbox className="mr-2 h-4 w-4" />
+                  <span>Inbox</span>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           {isLoading ? (
-            <p className="text-center">Loading all tasks...</p>
-          ) : (
+            <p className="text-center mt-4">Loading tasks...</p>
+          ) : error ? (
+            <p className="text-center text-red-500 mt-4">{error}</p>
+          ) : tasks.length === 0 ? (
             <div className="text-center">
               <svg
                 className="mx-auto mb-4"
@@ -80,14 +160,37 @@ export default function TaskList() {
                 creation form
               </p>
             </div>
+          ) : (
+            <ul>
+              {tasks.map((task) => (
+                <li key={task.id} className="mb-4 p-4 bg-white rounded shadow">
+                  <h3 className="text-lg font-semibold">{task.title}</h3>
+                  {task.description && (
+                    <p className="text-gray-600">{task.description}</p>
+                  )}
+                  <div className="flex justify-between mt-2 text-sm text-gray-500">
+                    <span>
+                      Due: {new Date(task.due_date || "").toLocaleDateString()}
+                    </span>
+                    <span>
+                      Created: {new Date(task.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
-        </Card>
-      </div>
+        </div>
+      </Card>
 
-      {/* Floating Action Button */}
-      <Button className="fixed bottom-6 right-6 rounded-full w-14 h-14 bg-blue-500 hover:bg-blue-600">
-        <PlusIcon size={24} />
-      </Button>
+      <div className="fixed bottom-4 right-4">
+        <Button
+          size="icon"
+          className="rounded-full w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   );
 }

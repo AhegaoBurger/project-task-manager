@@ -4,8 +4,19 @@ import { supabase } from "@/lib/supabaseClient";
 
 export async function GET(request: Request) {
   try {
-    const { data: tasks, error } = await supabase.from("tasks").select("*");
+    const { user_id } = await request.json();
 
+    if (!user_id) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 },
+      );
+    }
+
+    const { data: tasks, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", user_id);
     if (error) throw error;
 
     return NextResponse.json({ tasks });

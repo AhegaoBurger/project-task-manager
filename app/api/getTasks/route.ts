@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const { data: tasks, error } = await supabase
       .from("tasks")
       .select("*")
-      .eq("user_id", user_id);
+      .eq("created_by", user_id);
     if (error) throw error;
 
     return NextResponse.json({ tasks });

@@ -73,38 +73,45 @@ export default function TaskList({
     setInitData(initData);
     if (initData.user) {
       console.log("User from Telegram initData:", initData.user);
-      setUser(initData?.user); // Use Telegram user ID
-      createOrUpdateProfile(initData.user);
+      setUser(initData.user); // Use Telegram user ID
+      // createOrUpdateProfile(initData.user);
     } else {
       console.error("User not available in Telegram initData");
     }
-
-    const fetchTasks = async () => {
-      try {
-        const response = await fetch("/api/getTasks", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch tasks");
-        }
-
-        const data = await response.json();
-        setTasks(data.tasks);
-      } catch (err: any) {
-        console.error("Error fetching tasks:", err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTasks();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchTasks();
+    }
+  }, [user]); // This effect should run whenever the user state changes
+
+  const fetchTasks = async () => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/getTasks?telegram_id=${user.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch tasks");
+      }
+
+      const data = await response.json();
+      setTasks(data.tasks);
+    } catch (err: any) {
+      console.error("Error fetching tasks:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAddTask = () => {
     setIsAddingTask(!isAddingTask);
@@ -175,27 +182,27 @@ export default function TaskList({
     }
   };
 
-  const createOrUpdateProfile = async (user: WebAppUser) => {
-    try {
-      const { data, error } = await supabase.from("profiles").upsert(
-        {
-          telegram_id: user.id,
-          username: user.username,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          photo_url: user.photo_url,
-        },
-        { onConflict: "telegram_id" },
-      );
-      if (error) {
-        console.error("Error upserting profile:", error);
-        setError("Failed to update profile.");
-      }
-    } catch (error) {
-      console.error("Error in createOrUpdateProfile:", error);
-      setError("Failed to update profile.");
-    }
-  };
+  // const createOrUpdateProfile = async (user: WebAppUser) => {
+  //   try {
+  //     const { data, error } = await supabase.from("profiles").upsert(
+  //       {
+  //         telegram_id: user.id,
+  //         username: user.username,
+  //         first_name: user.first_name,
+  //         last_name: user.last_name,
+  //         photo_url: user.photo_url,
+  //       },
+  //       { onConflict: "telegram_id" },
+  //     );
+  //     if (error) {
+  //       console.error("Error upserting profile:", error);
+  //       setError("Failed to update profile.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in createOrUpdateProfile:", error);
+  //     setError("Failed to update profile.");
+  //   }
+  // };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
@@ -346,20 +353,27 @@ export default function TaskList({
           ) : (
             <ul className="my-2">
               {tasks.map((task) => (
-                <li key={task.id} className="mb-4 p-4 bg-white rounded shadow">
-                  <h3 className="text-lg font-semibold">{task.title}</h3>
-                  {task.description && (
-                    <p className="text-gray-600">{task.description}</p>
-                  )}
-                  <div className="flex justify-between mt-2 text-sm text-gray-500">
-                    <span>
-                      Due: {new Date(task.due_date || "").toLocaleDateString()}
-                    </span>
-                    <span>
-                      Created: {new Date(task.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </li>
+                <Link href={`/task/${task.id}`} key={task.id}>
+                  <li
+                    key={task.id}
+                    className="mb-4 p-4 bg-white rounded shadow hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <h3 className="text-lg font-semibold">{task.title}</h3>
+                    {task.description && (
+                      <p className="text-gray-600">{task.description}</p>
+                    )}
+                    <div className="flex justify-between mt-2 text-sm text-gray-500">
+                      <span>
+                        Due:{" "}
+                        {new Date(task.due_date || "").toLocaleDateString()}
+                      </span>
+                      <span>
+                        Created:{" "}
+                        {new Date(task.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </li>
+                </Link>
               ))}
             </ul>
           )}

@@ -44,7 +44,7 @@ export default function TaskForm({
     if (initData.user) {
       console.log("User from Telegram initData:", initData.user);
       setUser(initData?.user); // Use Telegram user ID
-      createOrUpdateProfile(initData.user);
+      // createOrUpdateProfile(initData.user);
     } else {
       console.error("User not available in Telegram initData");
     }
@@ -94,25 +94,25 @@ export default function TaskForm({
     }
   };
 
-  const createOrUpdateProfile = async (user: WebAppUser) => {
-    try {
-      const { data, error } = await supabase.from("profiles").upsert(
-        {
-          telegram_id: user.id,
-          username: user.username,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          photo_url: user.photo_url,
-        },
-        { onConflict: "telegram_id" },
-      );
-      if (error) {
-        console.error("Error upserting profile:", error);
-      }
-    } catch (error) {
-      console.error("Error in createOrUpdateProfile:", error);
-    }
-  };
+  // const createOrUpdateProfile = async (user: WebAppUser) => {
+  //   try {
+  //     const { data, error } = await supabase.from("profiles").upsert(
+  //       {
+  //         telegram_id: user.id,
+  //         username: user.username,
+  //         first_name: user.first_name,
+  //         last_name: user.last_name,
+  //         photo_url: user.photo_url,
+  //       },
+  //       { onConflict: "telegram_id" },
+  //     );
+  //     if (error) {
+  //       console.error("Error upserting profile:", error);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in createOrUpdateProfile:", error);
+  //   }
+  // };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">

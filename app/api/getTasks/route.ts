@@ -4,11 +4,12 @@ import { supabase } from "@/lib/supabaseClient";
 
 export async function GET(request: Request) {
   try {
-    const { user_id } = await request.json();
+    const { searchParams } = new URL(request.url);
+    const telegram_id = searchParams.get("telegram_id");
 
-    if (!user_id) {
+    if (!telegram_id) {
       return NextResponse.json(
-        { error: "User ID is required" },
+        { error: "Telegram ID is required" },
         { status: 400 },
       );
     }
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
     const { data: tasks, error } = await supabase
       .from("tasks")
       .select("*")
-      .eq("created_by", user_id);
+      .eq("created_by", telegram_id);
     if (error) throw error;
 
     return NextResponse.json({ tasks });

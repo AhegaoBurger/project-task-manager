@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation"; // Add this import
 
 interface TaskFormProps {
   groupId?: any;
@@ -33,6 +34,7 @@ export default function TaskForm({
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [user, setUser] = useState<WebAppUser | null>(null);
   const [initData, setInitData] = useState<WebAppInitData | null>(null);
+  const router = useRouter(); // Initialize the router
 
   useEffect(() => {
     console.log("TaskForm mounted");
@@ -89,30 +91,13 @@ export default function TaskForm({
       if (onTaskCreated) {
         onTaskCreated();
       }
+
+      // Redirect to the home page
+      router.push("/");
     } catch (error) {
       console.error("Error creating task:", error);
     }
   };
-
-  // const createOrUpdateProfile = async (user: WebAppUser) => {
-  //   try {
-  //     const { data, error } = await supabase.from("profiles").upsert(
-  //       {
-  //         telegram_id: user.id,
-  //         username: user.username,
-  //         first_name: user.first_name,
-  //         last_name: user.last_name,
-  //         photo_url: user.photo_url,
-  //       },
-  //       { onConflict: "telegram_id" },
-  //     );
-  //     if (error) {
-  //       console.error("Error upserting profile:", error);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error in createOrUpdateProfile:", error);
-  //   }
-  // };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">

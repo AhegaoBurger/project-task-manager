@@ -88,8 +88,7 @@ export default function TaskList({
     setInitData(initData);
     if (initData.user) {
       console.log("User from Telegram initData:", initData.user);
-      setUser(initData.user); // Use Telegram user ID
-      // createOrUpdateProfile(initData.user);
+      setUser(initData.user);
     } else {
       console.error("User not available in Telegram initData");
     }
@@ -99,7 +98,7 @@ export default function TaskList({
     if (user) {
       fetchTasks();
     }
-  }, [user]); // This effect should run whenever the user state changes
+  }, [user]);
 
   const fetchTasks = async () => {
     if (!user) return;
@@ -131,19 +130,18 @@ export default function TaskList({
   const handleAddTask = () => {
     setIsAddingTask(!isAddingTask);
     setNewTask({ title: "", description: "" });
-    setError(null); // Clear any existing errors
+    setError(null);
   };
 
   const handleCloseAddTask = () => {
     setIsAddingTask(false);
     setNewTask({ title: "", description: "" });
-    setError(null); // Clear any existing errors
+    setError(null);
   };
 
   const handleCreateTask = async () => {
     console.log("Creating task");
     if (!newTask.title.trim() || !user) {
-      // Added trim to check for empty strings
       console.error("Title and user are required");
       setError("Title is required.");
       return;
@@ -179,18 +177,9 @@ export default function TaskList({
 
       console.log("Task created successfully");
 
-      // if (onTaskCreated) {
-      //   onTaskCreated();
-      // }
-
-      // Optimistically update tasks state with the new task
       setTasks((prevTasks) => [data.task, ...prevTasks]);
-
-      // Close the Add Task form and reset input fields
       setIsAddingTask(false);
       setNewTask({ title: "", description: "" });
-
-      // Clear any existing errors
       setError(null);
     } catch (error) {
       console.error("Error creating task:", error);
@@ -231,7 +220,6 @@ export default function TaskList({
         throw new Error("Failed to delete task");
       }
 
-      // Remove the deleted task from the state
       setTasks(tasks.filter((task) => task.id !== selectedTask.id));
       setSelectedTask(null);
     } catch (error) {
@@ -261,7 +249,6 @@ export default function TaskList({
             <Card className="mb-4">
               <div className="p-4 space-y-4">
                 <div className="flex items-center">
-                  {/* <Checkbox id="newTaskCheckbox" /> */}
                   <X
                     onClick={() => {
                       setIsAddingTask(false);
@@ -271,9 +258,7 @@ export default function TaskList({
                   <Input
                     className="ml-2 flex-grow"
                     placeholder="Task title"
-                    // value={title}
                     value={newTask.title}
-                    // onChange={(e) => setTitle(e.target.value)}
                     onChange={(e) =>
                       setNewTask({ ...newTask, title: e.target.value })
                     }
@@ -282,8 +267,6 @@ export default function TaskList({
                 </div>
                 <Textarea
                   placeholder="Description..."
-                  // value={description}
-                  // onChange={(e) => setDescription(e.target.value)}
                   value={newTask.description}
                   onChange={(e) =>
                     setNewTask({ ...newTask, description: e.target.value })
@@ -389,11 +372,14 @@ export default function TaskList({
           ) : (
             <ul className="my-2">
               {tasks.map((task) => (
-                <Link href={`/task/${task.id}`} key={task.id}>
-                  <li
-                    key={task.id}
-                    className="mb-4 p-4 bg-white rounded shadow hover:shadow-md transition-shadow cursor-pointer"
-                  >
+                <li
+                  key={task.id}
+                  className="mb-4 p-4 bg-white rounded shadow hover:shadow-md transition-shadow cursor-pointer relative"
+                  onTouchStart={() => handleTaskTouchStart(task)}
+                  onTouchEnd={handleTaskTouchEnd}
+                  onContextMenu={(e) => handleTaskContextMenu(e, task)}
+                >
+                  <Link href={`/task/${task.id}`}>
                     <h3 className="text-lg font-semibold">{task.title}</h3>
                     {task.description && (
                       <p className="text-gray-600">{task.description}</p>
@@ -408,8 +394,40 @@ export default function TaskList({
                         {new Date(task.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                  </li>
-                </Link>
+                  </Link>
+                  {selectedTask?.id === task.id && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the task.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel
+                            onClick={() => setSelectedTask(null)}
+                          >
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteTask}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </li>
               ))}
             </ul>
           )}

@@ -152,7 +152,7 @@ const TaskManager = () => {
       icon: <MessageCircle className="w-5 h-5 text-blue-500" />,
       name: "NEWS",
       action: "Show",
-      href: "/news", // Define the actual route
+      // href: "/news", // Define the actual route
     },
     {
       icon: <PlusIcon className="w-5 h-5 text-gray-500" />,
@@ -170,27 +170,27 @@ const TaskManager = () => {
     {
       icon: <Inbox className="w-5 h-5 text-orange-500" />,
       name: "Inbox",
-      count: "1",
+      count: 0,
     },
     {
       icon: <Calendar className="w-5 h-5 text-green-500" />,
       name: "Today",
-      count: "2",
+      count: 0,
     },
     {
       icon: <CalendarCheck className="w-5 h-5 text-red-500" />,
       name: "Tomorrow",
-      count: "0",
+      count: 0,
     },
     {
       icon: <CalendarDays className="w-5 h-5 text-purple-500" />,
       name: "Next 7 Days",
-      count: "0",
+      count: 0,
     },
     {
       icon: <CheckSquare className="w-5 h-5 text-gray-500" />,
       name: "Completed",
-      count: "2",
+      count: 0,
     },
   ];
 
@@ -225,7 +225,7 @@ const TaskManager = () => {
   ];
 
   return (
-    <div className="flex flex-col bg-gray-100 text-gray-900 max-w-md mx-auto">
+    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
       <Card className="m-2 bg-white">
         <div className="flex items-center justify-between p-3">
           <Link href="/user">

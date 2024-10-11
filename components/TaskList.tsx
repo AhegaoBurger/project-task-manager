@@ -41,6 +41,7 @@ import WebApp from "@twa-dev/sdk";
 import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import Link from "next/link";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 
 interface TaskFormProps {
   groupId?: any;
@@ -79,6 +80,8 @@ export default function TaskList({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const longPressDuration = 500; // milliseconds
+  const [isLongPress, setIsLongPress] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     WebApp.BackButton.show();
@@ -191,15 +194,26 @@ export default function TaskList({
   };
 
   const handleTaskTouchStart = (task: Task) => {
-    longPressTimer.current = setTimeout(
-      () => handleTaskLongPress(task),
-      longPressDuration,
-    );
+    setIsLongPress(false);
+    longPressTimer.current = setTimeout(() => {
+      setIsLongPress(true);
+      handleTaskLongPress(task);
+    }, longPressDuration);
   };
 
-  const handleTaskTouchEnd = () => {
+  const handleTaskTouchEnd = (task: Task) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
+    }
+    if (!isLongPress) {
+      router.push(`/task/${task.id}`);
+    }
+  };
+
+  const handleTaskClick = (e: React.MouseEvent, task: Task) => {
+    e.preventDefault();
+    if (!isLongPress) {
+      router.push(`/task/${task.id}`);
     }
   };
 
@@ -284,7 +298,9 @@ export default function TaskList({
                     <Popover>
                       <PopoverTrigger asChild>
                         <span
-                          className={`flex items-center ${!dueDate && "text-gray-500"}`}
+                          className={`flex items-center ${
+                            !dueDate && "text-gray-500"
+                          }`}
                         >
                           <CalendarIcon className="h-4 w-4 mr-2" />
                           {dueDate ? format(dueDate, "PPP") : "Today"}
@@ -376,25 +392,22 @@ export default function TaskList({
                   key={task.id}
                   className="mb-4 p-4 bg-white rounded shadow hover:shadow-md transition-shadow cursor-pointer relative"
                   onTouchStart={() => handleTaskTouchStart(task)}
-                  onTouchEnd={handleTaskTouchEnd}
+                  onTouchEnd={() => handleTaskTouchEnd(task)}
+                  onClick={(e) => handleTaskClick(e, task)}
                   onContextMenu={(e) => handleTaskContextMenu(e, task)}
                 >
-                  <Link href={`/task/${task.id}`}>
-                    <h3 className="text-lg font-semibold">{task.title}</h3>
-                    {task.description && (
-                      <p className="text-gray-600">{task.description}</p>
-                    )}
-                    <div className="flex justify-between mt-2 text-sm text-gray-500">
-                      <span>
-                        Due:{" "}
-                        {new Date(task.due_date || "").toLocaleDateString()}
-                      </span>
-                      <span>
-                        Created:{" "}
-                        {new Date(task.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </Link>
+                  <h3 className="text-lg font-semibold">{task.title}</h3>
+                  {task.description && (
+                    <p className="text-gray-600">{task.description}</p>
+                  )}
+                  <div className="flex justify-between mt-2 text-sm text-gray-500">
+                    <span>
+                      Due: {new Date(task.due_date || "").toLocaleDateString()}
+                    </span>
+                    <span>
+                      Created: {new Date(task.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
                   {selectedTask?.id === task.id && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>

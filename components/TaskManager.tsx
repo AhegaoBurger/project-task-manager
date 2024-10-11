@@ -26,6 +26,12 @@ import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface Group {
   chat_id: number;

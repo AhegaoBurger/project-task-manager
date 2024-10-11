@@ -51,6 +51,10 @@ const TaskManager = () => {
   const [groupsLoading, setGroupsLoading] = useState(false);
   const [groupsError, setGroupsError] = useState<string | null>(null);
 
+  const [taskCount, setTaskCount] = useState<number>(0);
+  const [taskCountLoading, setTaskCountLoading] = useState(false);
+  const [taskCountError, setTaskCountError] = useState<string | null>(null);
+
   useEffect(() => {
     const initWebApp = () => {
       WebApp.ready();
@@ -67,6 +71,7 @@ const TaskManager = () => {
   useEffect(() => {
     if (user) {
       fetchGroups();
+      fetchTasks();
     }
   }, [user]);
 
@@ -98,6 +103,39 @@ const TaskManager = () => {
     }
   };
 
+  const fetchTasks = async () => {
+    setTaskCountLoading(true);
+    setTaskCountError(null);
+    if (!user) return;
+
+    try {
+      setGroupsLoading(true);
+      const response = await fetch(`/api/getTasks?telegram_id=${user.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch tasks");
+      }
+
+      const data = await response.json();
+      setTaskCount(data.tasks.length);
+    } catch (err: any) {
+      console.error("Error fetching tasks:", err);
+      setTaskCountError(err.message);
+    } finally {
+      setTaskCountLoading(false);
+    }
+  };
+
+  const refreshTaskCount = () => {
+    fetchTasks();
+  };
+
   const handleAddBot = () => {
     // const botUsername = "TonYarnBot"; // Dev
     const botUsername = "managingtasksbot"; // Live
@@ -127,7 +165,7 @@ const TaskManager = () => {
     {
       icon: <Inbox className="w-5 h-5 text-blue-500" />,
       name: "All",
-      count: "2",
+      count: taskCount.toString(),
     },
     {
       icon: <Inbox className="w-5 h-5 text-orange-500" />,
@@ -285,7 +323,13 @@ const TaskManager = () => {
                 <span className="text-sm">{item.name}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-xs text-gray-500 mr-2">{item.count}</span>
+                {taskCountLoading ? (
+                  <Skeleton className="h-4 w-4 mr-2" />
+                ) : (
+                  <span className="text-xs text-gray-500 mr-2">
+                    {item.count}
+                  </span>
+                )}
                 <ChevronRight className="h-4 w-4 text-gray-400" />
               </div>
             </div>

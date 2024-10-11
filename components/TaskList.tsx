@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,6 +14,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   ChevronLeft,
   MoreVertical,
   Plus,
@@ -24,6 +35,7 @@ import {
   Paperclip,
   ChevronRight,
   X,
+  Trash2,
 } from "lucide-react";
 import WebApp from "@twa-dev/sdk";
 import { WebAppUser, WebAppInitData } from "@twa-dev/types";
@@ -64,6 +76,9 @@ export default function TaskList({
   const [newTask, setNewTask] = useState({ title: "", description: "" });
   const [user, setUser] = useState<WebAppUser | null>(null);
   const [initData, setInitData] = useState<WebAppInitData | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressDuration = 500; // milliseconds
 
   useEffect(() => {
     WebApp.BackButton.show();
@@ -182,27 +197,48 @@ export default function TaskList({
     }
   };
 
-  // const createOrUpdateProfile = async (user: WebAppUser) => {
-  //   try {
-  //     const { data, error } = await supabase.from("profiles").upsert(
-  //       {
-  //         telegram_id: user.id,
-  //         username: user.username,
-  //         first_name: user.first_name,
-  //         last_name: user.last_name,
-  //         photo_url: user.photo_url,
-  //       },
-  //       { onConflict: "telegram_id" },
-  //     );
-  //     if (error) {
-  //       console.error("Error upserting profile:", error);
-  //       setError("Failed to update profile.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error in createOrUpdateProfile:", error);
-  //     setError("Failed to update profile.");
-  //   }
-  // };
+  const handleTaskLongPress = (task: Task) => {
+    setSelectedTask(task);
+  };
+
+  const handleTaskTouchStart = (task: Task) => {
+    longPressTimer.current = setTimeout(
+      () => handleTaskLongPress(task),
+      longPressDuration,
+    );
+  };
+
+  const handleTaskTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+    }
+  };
+
+  const handleTaskContextMenu = (e: React.MouseEvent, task: Task) => {
+    e.preventDefault();
+    setSelectedTask(task);
+  };
+
+  const handleDeleteTask = async () => {
+    if (!selectedTask) return;
+
+    try {
+      const response = await fetch(`/api/deleteTask?id=${selectedTask.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete task");
+      }
+
+      // Remove the deleted task from the state
+      setTasks(tasks.filter((task) => task.id !== selectedTask.id));
+      setSelectedTask(null);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      setError("Failed to delete task");
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">

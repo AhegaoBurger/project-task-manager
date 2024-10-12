@@ -198,39 +198,6 @@ export default function TaskList({
     }
   };
 
-  // const handleTaskLongPress = (task: Task) => {
-  //   setSelectedTask(task);
-  // };
-
-  // const handleTaskTouchStart = (task: Task) => {
-  //   setIsLongPress(false);
-  //   longPressTimer.current = setTimeout(() => {
-  //     setIsLongPress(true);
-  //     handleTaskLongPress(task);
-  //   }, longPressDuration);
-  // };
-
-  // const handleTaskTouchEnd = (task: Task) => {
-  //   if (longPressTimer.current) {
-  //     clearTimeout(longPressTimer.current);
-  //   }
-  //   if (!isLongPress) {
-  //     router.push(`/task/${task.id}`);
-  //   }
-  // };
-
-  const handleTaskClick = (e: React.MouseEvent, task: Task) => {
-    e.preventDefault();
-    if (!isLongPress) {
-      router.push(`/task/${task.id}`);
-    }
-  };
-
-  // const handleTaskContextMenu = (e: React.MouseEvent, task: Task) => {
-  //   e.preventDefault();
-  //   setSelectedTask(task);
-  // };
-
   const handleDeleteTask = async (taskId: string) => {
     try {
       const response = await fetch(`/api/deleteTask?id=${taskId}`, {

@@ -42,6 +42,15 @@ import { WebAppUser, WebAppInitData } from "@twa-dev/types";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import {
+  LeadingActions,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+  Type,
+} from "react-swipeable-list";
+import "react-swipeable-list/dist/styles.css";
 
 interface TaskFormProps {
   groupId?: any;
@@ -78,9 +87,9 @@ export default function TaskList({
   const [user, setUser] = useState<WebAppUser | null>(null);
   const [initData, setInitData] = useState<WebAppInitData | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const longPressDuration = 500; // milliseconds
-  const [isLongPress, setIsLongPress] = useState(false);
+  // const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  // const longPressDuration = 500; // milliseconds
+  // const [isLongPress, setIsLongPress] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -189,26 +198,26 @@ export default function TaskList({
     }
   };
 
-  const handleTaskLongPress = (task: Task) => {
-    setSelectedTask(task);
-  };
+  // const handleTaskLongPress = (task: Task) => {
+  //   setSelectedTask(task);
+  // };
 
-  const handleTaskTouchStart = (task: Task) => {
-    setIsLongPress(false);
-    longPressTimer.current = setTimeout(() => {
-      setIsLongPress(true);
-      handleTaskLongPress(task);
-    }, longPressDuration);
-  };
+  // const handleTaskTouchStart = (task: Task) => {
+  //   setIsLongPress(false);
+  //   longPressTimer.current = setTimeout(() => {
+  //     setIsLongPress(true);
+  //     handleTaskLongPress(task);
+  //   }, longPressDuration);
+  // };
 
-  const handleTaskTouchEnd = (task: Task) => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-    }
-    if (!isLongPress) {
-      router.push(`/task/${task.id}`);
-    }
-  };
+  // const handleTaskTouchEnd = (task: Task) => {
+  //   if (longPressTimer.current) {
+  //     clearTimeout(longPressTimer.current);
+  //   }
+  //   if (!isLongPress) {
+  //     router.push(`/task/${task.id}`);
+  //   }
+  // };
 
   const handleTaskClick = (e: React.MouseEvent, task: Task) => {
     e.preventDefault();
@@ -217,16 +226,14 @@ export default function TaskList({
     }
   };
 
-  const handleTaskContextMenu = (e: React.MouseEvent, task: Task) => {
-    e.preventDefault();
-    setSelectedTask(task);
-  };
+  // const handleTaskContextMenu = (e: React.MouseEvent, task: Task) => {
+  //   e.preventDefault();
+  //   setSelectedTask(task);
+  // };
 
-  const handleDeleteTask = async () => {
-    if (!selectedTask) return;
-
+  const handleDeleteTask = async (taskId: string) => {
     try {
-      const response = await fetch(`/api/deleteTask?id=${selectedTask.id}`, {
+      const response = await fetch(`/api/deleteTask?id=${taskId}`, {
         method: "DELETE",
       });
 
@@ -234,13 +241,22 @@ export default function TaskList({
         throw new Error("Failed to delete task");
       }
 
-      setTasks(tasks.filter((task) => task.id !== selectedTask.id));
-      setSelectedTask(null);
+      setTasks(tasks.filter((task) => task.id !== taskId));
     } catch (error) {
       console.error("Error deleting task:", error);
       setError("Failed to delete task");
     }
   };
+
+  const trailingActions = (taskId: string) => (
+    <TrailingActions>
+      <SwipeAction destructive={true} onClick={() => handleDeleteTask(taskId)}>
+        <div className="flex items-center justify-end bg-red-500 text-white px-4 h-full">
+          <Trash2 className="h-6 w-6" />
+        </div>
+      </SwipeAction>
+    </TrailingActions>
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900 max-w-md mx-auto">
@@ -386,63 +402,34 @@ export default function TaskList({
               </p>
             </div>
           ) : (
-            <ul className="my-2">
+            <SwipeableList type={Type.IOS}>
               {tasks.map((task) => (
-                <li
+                <SwipeableListItem
                   key={task.id}
-                  className="mb-4 p-4 bg-white rounded shadow hover:shadow-md transition-shadow cursor-pointer relative"
-                  onTouchStart={() => handleTaskTouchStart(task)}
-                  onTouchEnd={() => handleTaskTouchEnd(task)}
-                  onClick={(e) => handleTaskClick(e, task)}
-                  onContextMenu={(e) => handleTaskContextMenu(e, task)}
+                  trailingActions={trailingActions(task.id)}
                 >
-                  <h3 className="text-lg font-semibold">{task.title}</h3>
-                  {task.description && (
-                    <p className="text-gray-600">{task.description}</p>
-                  )}
-                  <div className="flex justify-between mt-2 text-sm text-gray-500">
-                    <span>
-                      Due: {new Date(task.due_date || "").toLocaleDateString()}
-                    </span>
-                    <span>
-                      Created: {new Date(task.created_at).toLocaleDateString()}
-                    </span>
+                  <div
+                    className="w-full h-full mb-4 p-4 bg-white rounded shadow hover:shadow-md transition-shadow cursor-pointer relative"
+                    onClick={() => router.push(`/task/${task.id}`)}
+                  >
+                    <h3 className="text-lg font-semibold">{task.title}</h3>
+                    {task.description && (
+                      <p className="text-gray-600">{task.description}</p>
+                    )}
+                    <div className="flex justify-between mt-2 text-sm text-gray-500">
+                      <span>
+                        Due:{" "}
+                        {new Date(task.due_date || "").toLocaleDateString()}
+                      </span>
+                      <span>
+                        Created:{" "}
+                        {new Date(task.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                  {selectedTask?.id === task.id && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete the task.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel
-                            onClick={() => setSelectedTask(null)}
-                          >
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction onClick={handleDeleteTask}>
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
-                </li>
+                </SwipeableListItem>
               ))}
-            </ul>
+            </SwipeableList>
           )}
         </div>
       </Card>

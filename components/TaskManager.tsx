@@ -44,6 +44,9 @@ interface MenuItem {
   name: string;
   action?: string;
   href?: string;
+  onClick?: () => void;
+  subtext?: string;
+  badge?: React.ReactElement;
 }
 
 const TaskManager = () => {
@@ -213,6 +216,7 @@ const TaskManager = () => {
       subtext:
         "A collaborative project is created by adding the bot to a Telegram group",
       count: "1/2",
+      onClick: handleAddBot,
     },
     {
       icon: <PlusCircle className="w-5 h-5 text-orange-500" />,
@@ -385,32 +389,65 @@ const TaskManager = () => {
         <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
           <DialogContent className="w-72 p-0 bg-white rounded-lg overflow-hidden mb-4">
             {popupItems.map((item, index) => (
-              <Link key={index} href={item.href || "#"}>
-                <div className="p-3 flex items-start border-b last:border-b-0">
-                  <span className="mr-3">{item.icon}</span>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-sm text-gray-900">
-                        {item.name}
-                      </span>
-                      {item.count && (
-                        <span className="text-xs text-gray-500">
-                          {item.count}
-                        </span>
-                      )}
-                      {item.badge && (
-                        <span className="bg-blue-500 text-white px-1.5 py-0.5 rounded-full text-xs">
-                          {item.badge}
-                        </span>
-                      )}
+              <div
+                key={index}
+                onClick={item.onClick} // Add this line
+                className="cursor-pointer" // Add this to show it's clickable
+              >
+                {item.href ? (
+                  <Link href={item.href}>
+                    <div className="p-3 flex items-start border-b last:border-b-0">
+                      <span className="mr-3">{item.icon}</span>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium text-sm text-gray-900">
+                            {item.name}
+                          </span>
+                          {item.count && (
+                            <span className="text-xs text-gray-500">
+                              {item.count}
+                            </span>
+                          )}
+                          {item.badge && (
+                            <span className="bg-blue-500 text-white px-1.5 py-0.5 rounded-full text-xs">
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {item.subtext}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {item.subtext}
-                    </p>
+                  </Link>
+                ) : (
+                  <div className="p-3 flex items-start border-b last:border-b-0">
+                    <span className="mr-3">{item.icon}</span>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm text-gray-900">
+                          {item.name}
+                        </span>
+                        {item.count && (
+                          <span className="text-xs text-gray-500">
+                            {item.count}
+                          </span>
+                        )}
+                        {item.badge && (
+                          <span className="bg-blue-500 text-white px-1.5 py-0.5 rounded-full text-xs">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {item.subtext}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
                   </div>
-                  <ChevronRight className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
-                </div>
-              </Link>
+                )}
+              </div>
             ))}
           </DialogContent>
           <DialogTrigger asChild>

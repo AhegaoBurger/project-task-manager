@@ -46,7 +46,18 @@ interface MenuItem {
   href?: string;
   onClick?: () => void;
   subtext?: string;
-  badge?: React.ReactElement;
+  count?: string;
+  badge?: string;
+}
+
+interface PopupItem {
+  icon: React.ReactElement;
+  name: string;
+  subtext: string;
+  href?: string;
+  count?: string;
+  badge?: string;
+  onClick?: () => void;
 }
 
 const TaskManager = () => {
@@ -203,7 +214,7 @@ const TaskManager = () => {
     },
   ];
 
-  const popupItems = [
+  const popupItems: PopupItem[] = [
     {
       icon: <PlusCircle className="w-5 h-5 text-green-500" />,
       name: "New task",
